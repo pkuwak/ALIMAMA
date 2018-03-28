@@ -94,10 +94,10 @@ def lgbCV(train, test):
         n_estimators=20000)
     lgb_model = lgb0.fit(X, y, eval_set=[(X_tes, y_tes)], early_stopping_rounds=200)
     best_iter = lgb_model.best_iteration_
-    predictors = [i for i in X.columns]
-    feat_imp = pd.Series(lgb_model.feature_importance(), predictors).sort_values(ascending=False)
-    print(feat_imp)
-    print(feat_imp.shape)
+    # predictors = [i for i in X.columns]
+    # feat_imp = pd.Series(lgb_model.feature_importance(), predictors).sort_values(ascending=False)
+    # print(feat_imp)
+    # print(feat_imp.shape)
     # pred= lgb_model.predict(test[col])
     pred = lgb_model.predict_proba(test[col])[:, 1]
     test['pred'] = pred
@@ -125,39 +125,42 @@ def sub(train, test, best_iter):
         subsample=0.9,
         n_estimators=best_iter)
     lgb_model = lgb0.fit(X, y)
-    predictors = [i for i in X.columns]
-    feat_imp = pd.Series(lgb_model.feature_importance(), predictors).sort_values(ascending=False)
-    print(feat_imp)
-    print(feat_imp.shape)
+# =============================================================================
+#     predictors = [i for i in X.columns]
+#     feat_imp = pd.Series(lgb_model.feature_importance(), predictors).sort_values(ascending=False)
+#     print(feat_imp)
+#     print(feat_imp.shape)
+# =============================================================================
     # pred= lgb_model.predict(test[col])
     pred = lgb_model.predict_proba(test[col])[:, 1]
     test['predicted_score'] = pred
     sub1 = test[['instance_id', 'predicted_score']]
-    sub=pd.read_csv("input/test.txt", sep="\s+")
+    sub=pd.read_csv("../data/round1_ijcai_18_test_a_20180301.txt", sep="\s+")
     sub=pd.merge(sub,sub1,on=['instance_id'],how='left')
     sub=sub.fillna(0)
-    #sub[['instance_id', 'predicted_score']].to_csv('result/result0320.csv',index=None,sep=' ')
-    sub[['instance_id', 'predicted_score']].to_csv('result/result0326.txt',sep=" ",index=False)
+    sub[['instance_id', 'predicted_score']].to_csv('../data/result0328.txt',sep=" ",index=False)
 
 
 if __name__ == "__main__":
-    train = pd.read_csv("input/train.txt", sep="\s+")
-    test = pd.read_csv("input/test.txt", sep="\s+")
-    data = pd.concat([train, test])
+    data = pd.read_csv("../data/round1_ijcai_18_train_20180301.txt", sep="\s+")
     data = data.drop_duplicates(subset='instance_id')  # 把instance id去重
     print('make feature')
     data = base_process(data)
-    data=shijian(data)
-    data=shop_fenduan(data)
-    data = slide_cnt(data)
-    data = zuhe(data)
+# =============================================================================
+#     data=shijian(data)
+#     data=shop_fenduan(data)
+#     data = slide_cnt(data)
+#     data = zuhe(data)
+# =============================================================================
     print('----------------------------全局统计特征---------------------------------------------------')
-    data = item(data)
-    data = user(data)
-    data = user_item(data)
-    data = user_shop(data)
-    data=shop_item(data)
-    "----------------------------------------------------线下----------------------------------------"
+# =============================================================================
+#     data = item(data)
+#     data = user(data)
+#     data = user_item(data)
+#     data = user_shop(data)
+#     data=shop_item(data)
+#     "----------------------------------------------------线下----------------------------------------"
+# =============================================================================
     train= data[(data['day'] >= 18) & (data['day'] <= 23)]
     test= data[(data['day'] == 24)]
     best_iter = lgbCV(train, test)
