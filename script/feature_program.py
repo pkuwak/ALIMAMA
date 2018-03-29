@@ -94,11 +94,10 @@ def lgbCV(train, test):
         n_estimators=20000)
     lgb_model = lgb0.fit(X, y, eval_set=[(X_tes, y_tes)], early_stopping_rounds=200)
     best_iter = lgb_model.best_iteration_
-    # predictors = [i for i in X.columns]
-    # feat_imp = pd.Series(lgb_model.feature_importance(), predictors).sort_values(ascending=False)
-    # print(feat_imp)
-    # print(feat_imp.shape)
-    # pred= lgb_model.predict(test[col])
+    predictors = [i for i in X.columns]
+    feat_imp = pd.Series(lgb_model.feature_importances_, predictors).sort_values(ascending=False)
+    print(feat_imp)
+    print(feat_imp.shape)
     pred = lgb_model.predict_proba(test[col])[:, 1]
     test['pred'] = pred
     test['index'] = range(len(test))
@@ -126,10 +125,10 @@ def sub(train, test, best_iter):
         n_estimators=best_iter)
     lgb_model = lgb0.fit(X, y)
 # =============================================================================
-#     predictors = [i for i in X.columns]
-#     feat_imp = pd.Series(lgb_model.feature_importance(), predictors).sort_values(ascending=False)
-#     print(feat_imp)
-#     print(feat_imp.shape)
+    predictors = [i for i in X.columns]
+    feat_imp = pd.Series(lgb_model.feature_importances_, predictors).sort_values(ascending=False)
+    print(feat_imp)
+    print(feat_imp.shape)
 # =============================================================================
     # pred= lgb_model.predict(test[col])
     pred = lgb_model.predict_proba(test[col])[:, 1]
@@ -142,7 +141,9 @@ def sub(train, test, best_iter):
 
 
 if __name__ == "__main__":
-    data = pd.read_csv("../data/round1_ijcai_18_train_20180301.txt", sep="\s+")
+    train = pd.read_csv("../data/round1_ijcai_18_train_20180301.txt", sep="\s+")
+    test = pd.read_csv("../data/round1_ijcai_18_test_a_20180301.txt", sep="\s+")
+    data = pd.concat([train, test])
     data = data.drop_duplicates(subset='instance_id')  # 把instance id去重
     print('make feature')
     data = base_process(data)
