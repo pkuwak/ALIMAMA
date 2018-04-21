@@ -37,7 +37,7 @@ X_test, y_test = test.iloc[:, :-1], test.iloc[:, -1]
 
 X_train, X_train_lr, y_train, y_train_lr = train_test_split(X_train, y_train, test_size=0.5)
 
-n_estimator = 10
+n_estimator = 100
 
 # Unsupervised transformation based on totally random trees
 rt = RandomTreesEmbedding(max_depth=3, n_estimators=n_estimator,
@@ -81,30 +81,48 @@ fpr_grd, tpr_grd, _ = roc_curve(y_test, y_pred_grd)
 y_pred_rf = rf.predict_proba(X_test)[:, 1]
 fpr_rf, tpr_rf, _ = roc_curve(y_test, y_pred_rf)
 
-plt.figure(1)
-plt.plot([0, 1], [0, 1], 'k--')
-plt.plot(fpr_rt_lm, tpr_rt_lm, label='RT + LR')
-plt.plot(fpr_rf, tpr_rf, label='RF')
-plt.plot(fpr_rf_lm, tpr_rf_lm, label='RF + LR')
-plt.plot(fpr_grd, tpr_grd, label='GBT')
-plt.plot(fpr_grd_lm, tpr_grd_lm, label='GBT + LR')
-plt.xlabel('False positive rate')
-plt.ylabel('True positive rate')
-plt.title('ROC curve')
-plt.legend(loc='best')
-plt.show()
+# plt.figure(1)
+# plt.plot([0, 1], [0, 1], 'k--')
+# plt.plot(fpr_rt_lm, tpr_rt_lm, label='RT + LR')
+# plt.plot(fpr_rf, tpr_rf, label='RF')
+# plt.plot(fpr_rf_lm, tpr_rf_lm, label='RF + LR')
+# plt.plot(fpr_grd, tpr_grd, label='GBT')
+# plt.plot(fpr_grd_lm, tpr_grd_lm, label='GBT + LR')
+# plt.xlabel('False positive rate')
+# plt.ylabel('True positive rate')
+# plt.title('ROC curve')
+# plt.legend(loc='best')
+# plt.show()
 
-plt.figure(2)
-plt.xlim(0, 0.2)
-plt.ylim(0.8, 1)
-plt.plot([0, 1], [0, 1], 'k--')
-plt.plot(fpr_rt_lm, tpr_rt_lm, label='RT + LR')
-plt.plot(fpr_rf, tpr_rf, label='RF')
-plt.plot(fpr_rf_lm, tpr_rf_lm, label='RF + LR')
-plt.plot(fpr_grd, tpr_grd, label='GBT')
-plt.plot(fpr_grd_lm, tpr_grd_lm, label='GBT + LR')
-plt.xlabel('False positive rate')
-plt.ylabel('True positive rate')
-plt.title('ROC curve (zoomed in at top left)')
-plt.legend(loc='best')
-plt.show()
+# plt.figure(2)
+# plt.xlim(0, 0.2)
+# plt.ylim(0.8, 1)
+# plt.plot([0, 1], [0, 1], 'k--')
+# plt.plot(fpr_rt_lm, tpr_rt_lm, label='RT + LR')
+# plt.plot(fpr_rf, tpr_rf, label='RF')
+# plt.plot(fpr_rf_lm, tpr_rf_lm, label='RF + LR')
+# plt.plot(fpr_grd, tpr_grd, label='GBT')
+# plt.plot(fpr_grd_lm, tpr_grd_lm, label='GBT + LR')
+# plt.xlabel('False positive rate')
+# plt.ylabel('True positive rate')
+# plt.title('ROC curve (zoomed in at top left)')
+# plt.legend(loc='best')
+# plt.show()
+
+first_layer = [grd, rf, pipeline]
+dataset_blend_train = []
+dataset_blend_test = []
+for clf in first_layer:
+    # pre = clf.predict_proba(X_train)[:, 1]
+    pre = clf.predict(X_train)    
+    dataset_blend_train.append(pre)
+    # pre = clf.predict_proba(X_test)[:, 1]
+    pre = clf.predict(X_test)
+    dataset_blend_test.append(pre)
+    print(log_loss(y_test, pre))
+dataset_blend_train = np.array(dataset_blend_train).T
+dataset_blend_test = np.array(dataset_blend_test).T
+clf = LogisticRegression()
+clf.fit(dataset_blend_train, y_train)
+y_submission = clf.predict_proba(dataset_blend_test)[:, 1]
+print(log_loss(y_test, y_submission))

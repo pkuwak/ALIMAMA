@@ -180,6 +180,6 @@ if __name__ == '__main__':
     # features = feabox.feature_program()
     feabox.feature_program()
     features = feabox.data
-    features.to_csv('../data/data.csv')
+    features.to_csv('../data/data.csv', index=False)
 
 
