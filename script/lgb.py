@@ -46,16 +46,16 @@ if __name__ == '__main__':
     test['is_trade'] = 2
 
     # =========================================================
-    # feabox = feature.featureBox(pd.concat([train, test]))
-    feabox = feature.featureBox(train)
+    feabox = feature.featureBox(pd.concat([train, test]))
+    # feabox = feature.featureBox(train)
     # =========================================================
     
     data = feabox.feature_program()
     data = load_data(data, dropna=True, drop_features=['item_property_ids'])
 
     # ==========================================================
-    # _train, _test = split(data, by='is_trade')
-    _train, _test = split(data, by='day') 
+    _train, _test = split(data, by='is_trade')
+    # _train, _test = split(data, by='day') 
     # ==========================================================    
     # train, valid = split(_train, by='day')   
     train, valid = train_test_split(_train, test_size=0.5)
@@ -80,18 +80,16 @@ if __name__ == '__main__':
         
     y_pre = online.predict(_test.iloc[:, :-1])
 
-    y_true = _test.iloc[:, -1].values
-    print(log_loss(y_true, y_pre))
+#    y_true = _test.iloc[:, -1].values
+#    print(log_loss(y_true, y_pre))
 
-    # result = pd.DataFrame([instance_id, y_pre]).T
-    # result.columns = ['instance_id', 'predicted_score']
+    result = pd.DataFrame([instance_id, y_pre]).T
+    result.columns = ['instance_id', 'predicted_score']
+    result['instance_id'] = result['instance_id'].astype(np.int64)
     
-    # result.index = result['instance_id']
-    # result = result.reindex(index=test['instance_id'])
-
-    # t = time.ctime()
-    # ts = t[4:16].replace(' ', '-').replace(':', '-')
-    # result.to_csv('../data/result%s.txt' % ts, sep=" ", index=False)
+    t = time.ctime()
+    ts = t[4:16].replace(' ', '-').replace(':', '-')
+    result.to_csv('../data/result%s.txt' % ts, sep=" ", index=False)
 
 
 
